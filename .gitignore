@@ -15,3 +15,33 @@ frontend/build/
 # その他一般的な無視ファイル
 .DS_Store
 *.log
+
+# 環境変数ファイル
+.env
+.env.local
+.env.development.local
+.env.test.local
+.env.production.local
+
+# エディタ設定
+.vscode/
+.idea/
+*.sublime-project
+*.sublime-workspace
+
+# テスト関連
+coverage/
+
+# 一時ファイル
+tmp/
+*.tmp
+*.swp
+*.swo
+
+# デバッグログ
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+
+# AWS関連
+aws/
