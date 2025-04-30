@@ -1,7 +1,7 @@
 # lambda/index.py
 import json
-
-import requests
+import urllib.error
+import urllib.request
 
 # FastAPIエンドポイントのURL
 FASTAPI_URL = "https://e5e8-34-126-131-45.ngrok-free.app"
@@ -38,7 +38,7 @@ def lambda_handler(event, context):
         
         print("Calling FastAPI endpoint with prompt:", prompt)
         
-        # FastAPIサーバーへのリクエスト
+        # FastAPIサーバーへのリクエストデータ
         payload = {
             "prompt": prompt,
             "max_new_tokens": 512,
@@ -47,17 +47,26 @@ def lambda_handler(event, context):
             "do_sample": True
         }
         
-        response = requests.post(
+        # URLリクエストを作成
+        data = json.dumps(payload).encode('utf-8')
+        req = urllib.request.Request(
             f"{FASTAPI_URL}/generate",
-            json=payload
+            data=data,
+            headers={
+                'Content-Type': 'application/json',
+            },
+            method='POST'
         )
         
-        if response.status_code != 200:
-            raise Exception(f"API error: {response.status_code} - {response.text}")
-        
-        # レスポンスを解析
-        response_data = response.json()
-        print("FastAPI response:", json.dumps(response_data))
+        # タイムアウト設定でリクエストを実行
+        try:
+            with urllib.request.urlopen(req, timeout=15) as response:
+                response_data = json.loads(response.read().decode('utf-8'))
+                print("FastAPI response:", json.dumps(response_data))
+        except urllib.error.HTTPError as e:
+            raise Exception(f"API error: {e.code} - {e.read().decode('utf-8')}")
+        except urllib.error.URLError as e:
+            raise Exception(f"URL error: {str(e)}")
         
         # アシスタントの応答を取得
         assistant_response = response_data["generated_text"]
